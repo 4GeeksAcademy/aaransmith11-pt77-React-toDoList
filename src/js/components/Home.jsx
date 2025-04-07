@@ -10,29 +10,43 @@ const Home = () => {
 
 	const apiBaseURL = "https://playground.4geeks.com/todo/docs";
 
-	const fetchTasks = () => {
-		fetch(`${apiBaseURL}/`)
+	const fetchUser = () => {
+		fetch("https://playground.4geeks.com/todo/users/aaransmith11")
 
 			.then((res) => res.json())
-			.then((data) => setToDoList(data))
-			.catch((err) => console.error("Error fetching tasks:", err));
-	}
+			.then((data) => {
+				if (data.detail=="User aaransmith11 doesn't exist."){
+					fetch("https://playground.4geeks.com/todo/users/aaransmith11", {
+						method:"POST"
+					})
+				}
+				else{
+					setToDoList(data.todos)
+				}
+			})
+		}
 
 	useEffect(() => {
-		fetchTasks();
+		fetchUser();
 	}, []);
 
 	const deleteToDo = (taskId) => {
-		fetch(`${apiBaseURL}//${taskId}`, {
+		fetch(`https://playground.4geeks.com/todo/todos/${taskId}`, {
 			method: "DELETE"
 		})
 		.then (() => fetchTasks())
 		.catch ((err) => console.error("Error Deleting Task:", err));
+		fetchUser();
+		window.location.reload()
 	}
 	const clearAllTasks = () => {
-		toDoList.forEach(task => {
-			deleteToDo(task.id);
-		});
+		fetch("https://playground.4geeks.com/todo/users/aaransmith11", {
+			method: "DELETE"
+		})
+		.then (() => fetchTasks())
+		.catch ((err) => console.error("Error Deleting Task:", err));
+		fetchUser();
+		window.location.reload()
 	};
 	return (
 		<div className="container">
@@ -45,14 +59,14 @@ const Home = () => {
 				value={inputValue}
 				onKeyPress={(e) => {
 					if (e.key === "Enter" && inputValue.trim() !=="") {
-						fetch(`${apiBaseURL}/`, {
+						fetch("https://playground.4geeks.com/todo/todos/aaransmith11", {
 							method: "POST",
 							headers: {"Content-Type": "application/json" },
 							body: JSON.stringify({label: inputValue.trim(), done: false})
 						})
 						.then(() => {
 							setInputValue("");
-							fetchTasks();
+							fetchUser();
 						})
 						.catch((err) => console.error("Error adding task:", err));
 					}
